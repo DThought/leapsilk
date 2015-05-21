@@ -30,10 +30,19 @@ public class VoxelGrid : MonoBehaviour {
     for (int r = 0; r < gridHeight; ++r) {
       for (int c = 0; c < gridWidth; ++c) {
         for (int l = 0; l < gridDepth; ++l) {
-          Vector3 location = new Vector3(c * cellWidth - center_x, l * cellDepth - center_z, r * cellHeight - center_y);
-          cube_grid_[r, c, l] = Instantiate(model, transform.position + location,
-                                         transform.rotation * model.transform.rotation) as Transform;
+          Vector3 location = new Vector3(c * cellWidth - center_x,
+                                         l * cellDepth - center_z,
+                                         r * cellHeight - center_y);
+
+          cube_grid_[r, c, l] = Instantiate(model, transform.position +
+              location, transform.rotation * model.transform.rotation) as
+              Transform;
+
           cube_grid_[r, c, l].parent = transform;
+
+          cube_grid_[r, c, l].GetComponent<Renderer>().material.color = new
+              Color((float) r / gridHeight, (float) c / gridWidth, (float) l /
+              gridDepth, 0.1F);
         }
       }
     }

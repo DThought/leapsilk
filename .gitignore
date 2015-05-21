@@ -1,6 +1,9 @@
 *
 !.gitignore
+!*.tags
 !/Assets/
+!/Assets/Scenes/
+!/Assets/Scenes/**
 !/Assets/Scripts/
 !/Assets/Scripts/**
 *.meta
