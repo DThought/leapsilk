@@ -9,6 +9,7 @@ public class VoxelGrid : MonoBehaviour {
   public float canvasHeight = 25;
   public float canvasDepth = 25;
   public Transform model;
+
   float cellWidth;
   float cellHeight;
   float cellDepth;
@@ -48,6 +49,10 @@ public class VoxelGrid : MonoBehaviour {
         }
       }
     }
+  }
+
+  Transform GetVoxel(Vector3 position) {
+
   }
 
   void Update() {
