@@ -5,26 +5,27 @@ public class VoxelGrid : MonoBehaviour {
   public int gridWidth = 25;
   public int gridHeight = 25;
   public int gridDepth = 25;
-  public float cellWidth = 1.0f;
-  public float cellHeight = 1.0f;
-  public float cellDepth = 1.0f;
+  public float canvasWidth = 25;
+  public float canvasHeight = 25;
+  public float canvasDepth = 25;
   public Transform model;
+  float cellWidth;
+  float cellHeight;
+  float cellDepth;
   Transform[,,] cube_grid_;
 
   void Start() {
     cube_grid_ = new Transform[gridHeight, gridWidth, gridDepth];
 
-    for (int r = 0; r < gridHeight; ++r) {
-      for (int c = 0; c < gridWidth; ++c) {
-        for (int l = 0; l < gridDepth; ++l) {
-          cube_grid_[r, c, l] = transform;
-        }
-      }
-    }
+    float center_x = canvasWidth / 2;
+    float center_y = canvasHeight / 2;
+    float center_z = canvasDepth / 2;
 
-    float center_x = gridWidth * cellWidth / 2.0f;
-    float center_y = gridHeight * cellHeight / 2.0f;
-    float center_z = gridDepth * cellDepth / 2.0f;
+    cellWidth = canvasWidth / gridWidth;
+    cellHeight = canvasHeight / gridHeight;
+    cellDepth = canvasDepth / gridDepth;
+
+    Vector3 scale = new Vector3(cellWidth, cellDepth, cellHeight);
 
     // Setup the cube grid.
     for (int r = 0; r < gridHeight; ++r) {
@@ -38,6 +39,7 @@ public class VoxelGrid : MonoBehaviour {
               location, transform.rotation * model.transform.rotation) as
               Transform;
 
+          cube_grid_[r, c, l].localScale = scale;
           cube_grid_[r, c, l].parent = transform;
 
           cube_grid_[r, c, l].GetComponent<Renderer>().material.color = new
@@ -49,7 +51,6 @@ public class VoxelGrid : MonoBehaviour {
   }
 
   void Update() {
-
     // TODO: update relevant voxels
   }
 }
