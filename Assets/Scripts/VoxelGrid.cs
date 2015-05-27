@@ -51,8 +51,9 @@ public class VoxelGrid : MonoBehaviour {
     }
   }
 
-  Transform GetVoxel(Vector3 position) {
-
+  public Transform GetVoxel(Vector3 position) {
+    // TODO: find voxel in grid from position vector
+    return transform;
   }
 
   void Update() {
