@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using Leap;
 
 public class VoxelGrid : MonoBehaviour {
   public int gridWidth = 25;
@@ -9,7 +10,7 @@ public class VoxelGrid : MonoBehaviour {
   public float canvasHeight = 25;
   public float canvasDepth = 25;
   public Transform model;
-
+  
   float cellWidth;
   float cellHeight;
   float cellDepth;
@@ -49,6 +50,7 @@ public class VoxelGrid : MonoBehaviour {
         }
       }
     }
+    
   }
 
   public Transform GetVoxel(Vector3 position) {
@@ -57,6 +59,6 @@ public class VoxelGrid : MonoBehaviour {
   }
 
   void Update() {
-    // TODO: update relevant voxels
+    // TODO
   }
 }

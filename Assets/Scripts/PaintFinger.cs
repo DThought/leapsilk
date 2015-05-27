@@ -8,13 +8,15 @@ public class PaintFinger : SkeletalFinger {
 
   Transform lastVoxel;
 
-  public override void UpdateFinger() {
-    base.UpdateFinger();
+  public override void InitFinger() {
+    base.InitFinger();
 
     // TODO: check TipVelocity to ensure movement
     if (GetLeapFinger().IsExtended) {
       Vector3 tip = GetTipPosition();
       Transform voxel = canvas.GetVoxel(tip);
+
+      print ("EXTENDED");
 
       if (voxel != lastVoxel) {
         lastVoxel = voxel;
@@ -23,5 +25,11 @@ public class PaintFinger : SkeletalFinger {
 
     GUI.Label(new Rect(10, 10, 100, 20), GetTipPosition().ToString());
     GUI.Label(new Rect(10, 30, 100, 20), GetLeapFinger().TipVelocity.ToString());
+  }
+
+  public override void UpdateFinger() {
+    base.UpdateFinger();
+
+    print ("UPDATED");
   }
 }
