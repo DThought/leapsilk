@@ -55,7 +55,7 @@ public class VoxelGrid : MonoBehaviour {
 
           cube_grid_[r, c, l].GetComponent<Renderer>().material.color = new
               Color((float) r / gridHeight, (float) c / gridWidth, (float) l /
-              gridDepth, 0.01F);
+              gridDepth, 0.1F);
         }
       }
     }
@@ -67,14 +67,11 @@ public class VoxelGrid : MonoBehaviour {
    * @param pressure amount of new color to apply.
    */
   public void DrawVoxel(Vector3 point, float pressure) {
-    Transform cell = GetVoxel(point);
+    point = ToGrid(point);
 
-    if (cell) {
-      Renderer voxel = cell.GetComponent<Renderer>();
-
-      voxel.material.color = Color.Lerp(voxel.material.color, brushColor,
-          pressure);
-    }
+    try {
+      DrawCell((int) point.z, (int) point.x, (int) point.y, pressure);
+    } catch (IndexOutOfRangeException) { }
   }
 
   /**
@@ -85,41 +82,113 @@ public class VoxelGrid : MonoBehaviour {
    */
   public void DrawLine(Vector3 start, Vector3 end, float pressure) {
     try {
-      start = ClipLine(start, end);
-      end = ClipLine(end, start);
-
-      // TODO: implement 3D Bresenham
-    } catch (ArgumentOutOfRangeException e) { }
-  }
-
-  /**
-   * @brief Finds the voxel at a point.
-   * @param position coordinates of the point.
-   * @return The voxel object, or null if out of bounds
-   */
-  public Transform GetVoxel(Vector3 position) {
-    position -= transform.position;
-
-    int c = (int) ((position.x + center_x) / cellWidth);
-    int l = (int) ((position.y + center_z) / cellDepth);
-    int r = (int) ((position.z + center_y) / cellHeight);
-
-    if (c < 0 || l < 0 || r < 0 ||
-        c >= gridWidth || l >= gridDepth || r >= gridHeight) {
-
-      return null;
+      start = CanvasClip(start, end) - transform.position;
+      end = CanvasClip(end, start) - transform.position;
+    } catch (ArgumentOutOfRangeException) {
+      return;
     }
 
-    return cube_grid_[r, c, l];
+    int c1 = (int) ((start.x + center_x) / cellWidth);
+    int l1 = (int) ((start.y + center_z) / cellDepth);
+    int r1 = (int) ((start.z + center_y) / cellHeight);
+    int c2 = (int) ((end.x + center_x) / cellWidth);
+    int l2 = (int) ((end.y + center_z) / cellDepth);
+    int r2 = (int) ((end.z + center_y) / cellHeight);
+    int dc = c2 - c1;
+    int dl = l2 - l1;
+    int dr = r2 - r1;
+    int ac = Math.Abs(dc) * 2;
+    int al = Math.Abs(dl) * 2;
+    int ar = Math.Abs(dr) * 2;
+    int sc = Math.Sign(dc);
+    int sl = Math.Sign(dl);
+    int sr = Math.Sign(dr);
+
+    if (ac >= al && ac >= ar) {
+      dl = al - ac / 2;
+      dr = ar - ac / 2;
+
+      while (true) {
+        DrawCell(r1, c1, l1, pressure);
+
+        if (c1 == c2) {
+          break;
+        }
+
+        if (dl >= 0) {
+          l1 += sl;
+          dl -= ac;
+        }
+
+        if (dr >= 0) {
+          r1 += sr;
+          dr -= ac;
+        }
+
+        c1 += sc;
+        dl += al;
+        dr += ar;
+      }
+    } else if (al >= ac && al >= ar) {
+      dc = ac - al / 2;
+      dr = ar - al / 2;
+
+      while (true) {
+        DrawCell(r1, c1, l1, pressure);
+
+        if (l1 == l2) {
+          break;
+        }
+
+        if (dc >= 0) {
+          c1 += sc;
+          dc -= al;
+        }
+
+        if (dr >= 0) {
+          r1 += sr;
+          dr -= al;
+        }
+
+        l1 += sl;
+        dc += ac;
+        dr += ar;
+      }
+    } else if (ar >= al && ar >= ac) {
+      dc = ac - ar / 2;
+      dl = al - ar / 2;
+
+      while (true) {
+        DrawCell(r1, c1, l1, pressure);
+
+        if (r1 == r2) {
+          break;
+        }
+
+        if (dc >= 0) {
+          c1 += sc;
+          dc -= ar;
+        }
+
+        if (dl >= 0) {
+          l1 += sl;
+          dl -= ar;
+        }
+
+        r1 += sr;
+        dc += ac;
+        dl += al;
+      }
+    }
   }
 
   /**
    * @brief Adds a point to the position history.
    * @param id the ID of the tracker.
-   * @param position the point to add.
+   * @param point the point to add.
    */
-  public void LogPoint(int id, Vector3 position) {
-    history.Add(position);
+  public void LogPoint(int id, Vector3 point) {
+    history.Add(point);
 
     if (history.Count > MAX_HISTORY) {
       history.RemoveAt(0);
@@ -128,53 +197,97 @@ public class VoxelGrid : MonoBehaviour {
     brush.Paint(this, history);
   }
 
-  Vector3 ClipLine(Vector3 point, Vector3 origin) {
+  /**
+   * @brief Clips an endpoint of a line segment within the canvas bounds.
+   * @param point the endpoint to clip.
+   * @param origin the endpoint to use as reference.
+   * @return A point on the line segment guaranteed to be within bounds
+   */
+  Vector3 CanvasClip(Vector3 point, Vector3 origin) {
+    float t;
+
     point -= transform.position;
     origin -= transform.position;
 
-    // TODO: implement clipping
     if (point.x + center_x < 0) {
       if (origin.x + center_x < 0) {
         throw new ArgumentOutOfRangeException();
       }
 
-
+      t = (cellWidth - origin.x - center_x) / (point.x - origin.x);
+      point = origin + (point - origin) * t;
     } else if (point.x + center_x >= canvasWidth) {
       if (origin.x + center_x >= canvasWidth) {
         throw new ArgumentOutOfRangeException();
       }
 
+      t = (canvasWidth - cellWidth - origin.x - center_x) /
+          (point.x - origin.x);
 
+      point = origin + (point - origin) * t;
     }
 
-    if (point.y + center_y < 0) {
-      if (origin.y + center_y < 0) {
+    if (point.y + center_z < 0) {
+      if (origin.y + center_z < 0) {
         throw new ArgumentOutOfRangeException();
       }
 
-
-    } else if (point.y + center_y >= canvasHeight) {
-      if (origin.y + center_y >= canvasWidth) {
+      t = (cellDepth - origin.y - center_z) / (point.y - origin.y);
+      point = origin + (point - origin) * t;
+    } else if (point.y + center_z >= canvasDepth) {
+      if (origin.y + center_z >= canvasDepth) {
         throw new ArgumentOutOfRangeException();
       }
 
+      t = (canvasDepth - cellDepth - origin.y - center_z) /
+          (point.y - origin.y);
 
+      point = origin + (point - origin) * t;
     }
 
-    if (point.z + center_z < 0) {
-      if (origin.z + center_z < 0) {
+    if (point.z + center_y < 0) {
+      if (origin.z + center_y < 0) {
         throw new ArgumentOutOfRangeException();
       }
 
-
-    } else if (point.z + center_z >= canvasHeight) {
-      if (origin.z + center_z >= canvasWidth) {
+      t = (cellHeight - origin.z - center_y) / (point.z - origin.z);
+      point = origin + (point - origin) * t;
+    } else if (point.z + center_y >= canvasHeight) {
+      if (origin.z + center_y >= canvasHeight) {
         throw new ArgumentOutOfRangeException();
       }
 
+      t = (canvasHeight - cellHeight - origin.z - center_y) /
+          (point.z - origin.z);
 
+      point = origin + (point - origin) * t;
     }
 
     return point + transform.position;
+  }
+
+  /**
+   * @brief Adjusts the color of the voxel.
+   * @param point grid coordinates of the voxel.
+   * @param pressure amount of new color to apply.
+   */
+  void DrawCell(int r, int c, int l, float pressure) {
+    Renderer voxel = cube_grid_[r, c, l].GetComponent<Renderer>();
+
+    voxel.material.color = Color.Lerp(voxel.material.color, brushColor,
+        pressure);
+  }
+
+  /**
+   * @brief Converts Unity coordinates to grid coordinates.
+   * @param position Unity coordinates to convert.
+   * @return Grid coordinates containing the input position
+   */
+  Vector3 ToGrid(Vector3 position) {
+    position -= transform.position;
+    position.x = (int) ((position.x + center_x) / cellWidth);
+    position.y = (int) ((position.y + center_z) / cellDepth);
+    position.z = (int) ((position.z + center_y) / cellHeight);
+    return position;
   }
 }
