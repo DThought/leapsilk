@@ -1,9 +1,13 @@
 *
 !.gitignore
 !Doxyfile
+!README.*
 !/Assets/
 !/Assets/Scenes/
 !/Assets/Scenes/**
 !/Assets/Scripts/
 !/Assets/Scripts/**
-*.meta
+!/Assets/LeapMotion/
+!/Assets/LeapMotion/Scripts/
+!/Assets/LeapMotion/Scripts/Hands/SkeletalHand.*
+!/Assets/LeapMotion/Scripts/Hands/SkeletalFinger.*
