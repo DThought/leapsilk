@@ -9,5 +9,6 @@
 !/Assets/Scripts/**
 !/Assets/LeapMotion/
 !/Assets/LeapMotion/Scripts/
+!/Assets/LeapMotion/Scripts/Hands/
 !/Assets/LeapMotion/Scripts/Hands/SkeletalHand.*
 !/Assets/LeapMotion/Scripts/Hands/SkeletalFinger.*
