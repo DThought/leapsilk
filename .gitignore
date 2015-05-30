@@ -1,6 +1,6 @@
 *
 !.gitignore
-!*.tags
+!Doxyfile
 !/Assets/
 !/Assets/Scenes/
 !/Assets/Scenes/**
