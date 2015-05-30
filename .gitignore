@@ -1,7 +1,7 @@
 *
 !.gitignore
 !Doxyfile
-!README.*
+!/README.*
 !/Assets/
 !/Assets/Scenes/
 !/Assets/Scenes/**
