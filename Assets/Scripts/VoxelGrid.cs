@@ -15,6 +15,7 @@ public class VoxelGrid : MonoBehaviour {
   public Transform model;
   public Brush brush;
   public Color brushColor = Color.red;
+  public float debugPressure = 0;
 
   float cellWidth;
   float cellHeight;
@@ -55,7 +56,7 @@ public class VoxelGrid : MonoBehaviour {
 
           cube_grid_[r, c, l].GetComponent<Renderer>().material.color = new
               Color((float) r / gridHeight, (float) c / gridWidth, (float) l /
-              gridDepth, 0.1F);
+              gridDepth, debugPressure);
         }
       }
     }
