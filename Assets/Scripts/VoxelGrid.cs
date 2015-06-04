@@ -90,7 +90,6 @@ public class VoxelGrid : MonoBehaviour {
       return;
     }
 
-    // see ftp://ftp.isc.org/pub/usenet/comp.sources.unix/volume26/line3d
     int c1 = (int) ((start.x + center_x) / cellWidth);
     int l1 = (int) ((start.y + center_z) / cellDepth);
     int r1 = (int) ((start.z + center_y) / cellHeight);
@@ -108,7 +107,6 @@ public class VoxelGrid : MonoBehaviour {
     int sign_r = Math.Sign(dr);
 
     if (abs_c >= abs_l && abs_c >= abs_r) {
-      // gradient dominant in direction of c
       dl = abs_l - abs_c / 2;
       dr = abs_r - abs_c / 2;
 
@@ -134,7 +132,6 @@ public class VoxelGrid : MonoBehaviour {
         dr += abs_r;
       }
     } else if (abs_l >= abs_c && abs_l >= abs_r) {
-      // gradient dominant in direction of l
       dc = abs_c - abs_l / 2;
       dr = abs_r - abs_l / 2;
 
@@ -160,7 +157,6 @@ public class VoxelGrid : MonoBehaviour {
         dr += abs_r;
       }
     } else if (abs_r >= abs_l && abs_r >= abs_c) {
-      // gradient dominant in direction of r
       dc = abs_c - abs_r / 2;
       dl = abs_l - abs_r / 2;
 
