@@ -3,10 +3,10 @@ using System;
 using System.Collections.Generic;
 
 public class VectorQueue {
-  private List<Vector3> history;
-  private int c;
-
   public int Id { get; set; }
+  
+  protected List<Vector3> history;
+  protected int c;
 
   public int Count {
     get {
@@ -43,6 +43,7 @@ public class VectorQueue {
   }
 
   public VectorQueue(int id, int capacity) {
+    history = new List<Vector3>();
     Id = id;
     Capacity = capacity;
   }
