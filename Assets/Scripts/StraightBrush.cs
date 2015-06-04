@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Leap;
 
 public class StraightBrush : Brush {
-  public override void Paint(VoxelGrid canvas, List<Vector3> points) {
+  public override void Paint(VoxelGrid canvas, VectorQueue points) {
     if (points.Count < 2) {
       return;
     }

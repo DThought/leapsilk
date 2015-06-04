@@ -11,7 +11,6 @@ public class PaintFinger : SkeletalFinger {
 
     if (GetLeapFinger().IsExtended &&
         GetLeapFinger().TipVelocity.MagnitudeSquared >= MIN_SPEED) {
-
       canvas.LogPoint(GetLeapFinger().Id, GetTipPosition());
     }
   }

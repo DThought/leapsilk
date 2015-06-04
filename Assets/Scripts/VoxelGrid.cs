@@ -5,6 +5,7 @@ using Leap;
 
 public class VoxelGrid : MonoBehaviour {
   protected const int MAX_HISTORY = 4;
+  protected const int MAX_TRACKERS = 2;
 
   public int gridWidth = 25;
   public int gridHeight = 25;
@@ -24,15 +25,15 @@ public class VoxelGrid : MonoBehaviour {
   float center_y;
   float center_z;
   Transform[,,] cube_grid_;
-  List<Vector3> history;
+  List<VectorQueue> histories;
 
   void Start() {
     cube_grid_ = new Transform[gridHeight, gridWidth, gridDepth];
-    history = new List<Vector3>();
+    histories = new List<VectorQueue>();
+
     center_x = canvasWidth / 2;
     center_y = canvasHeight / 2;
     center_z = canvasDepth / 2;
-
     cellWidth = canvasWidth / gridWidth;
     cellHeight = canvasHeight / gridHeight;
     cellDepth = canvasDepth / gridDepth;
@@ -46,17 +47,17 @@ public class VoxelGrid : MonoBehaviour {
           Vector3 location = new Vector3(c * cellWidth - center_x,
                                          l * cellDepth - center_z,
                                          r * cellHeight - center_y);
-
-          cube_grid_[r, c, l] = Instantiate(model, transform.position +
-              location, transform.rotation * model.transform.rotation) as
-              Transform;
-
+          cube_grid_[r, c, l] = Instantiate(
+              model,
+              transform.position + location,
+              transform.rotation * model.transform.rotation) as Transform;
           cube_grid_[r, c, l].localScale = scale;
           cube_grid_[r, c, l].parent = transform;
-
           cube_grid_[r, c, l].GetComponent<Renderer>().material.color = new
-              Color((float) r / gridHeight, (float) c / gridWidth, (float) l /
-              gridDepth, debugPressure);
+              Color((float) r / gridHeight,
+                    (float) c / gridWidth,
+                    (float) l / gridDepth,
+                    debugPressure);
         }
       }
     }
@@ -72,7 +73,7 @@ public class VoxelGrid : MonoBehaviour {
 
     try {
       DrawCell((int) point.z, (int) point.x, (int) point.y, pressure);
-    } catch (IndexOutOfRangeException) { }
+    } catch (IndexOutOfRangeException) {}
   }
 
   /**
@@ -89,6 +90,7 @@ public class VoxelGrid : MonoBehaviour {
       return;
     }
 
+    // see ftp://ftp.isc.org/pub/usenet/comp.sources.unix/volume26/line3d
     int c1 = (int) ((start.x + center_x) / cellWidth);
     int l1 = (int) ((start.y + center_z) / cellDepth);
     int r1 = (int) ((start.z + center_y) / cellHeight);
@@ -98,16 +100,17 @@ public class VoxelGrid : MonoBehaviour {
     int dc = c2 - c1;
     int dl = l2 - l1;
     int dr = r2 - r1;
-    int ac = Math.Abs(dc) * 2;
-    int al = Math.Abs(dl) * 2;
-    int ar = Math.Abs(dr) * 2;
-    int sc = Math.Sign(dc);
-    int sl = Math.Sign(dl);
-    int sr = Math.Sign(dr);
+    int abs_c = Math.Abs(dc) * 2;
+    int abs_l = Math.Abs(dl) * 2;
+    int abs_r = Math.Abs(dr) * 2;
+    int sign_c = Math.Sign(dc);
+    int sign_l = Math.Sign(dl);
+    int sign_r = Math.Sign(dr);
 
-    if (ac >= al && ac >= ar) {
-      dl = al - ac / 2;
-      dr = ar - ac / 2;
+    if (abs_c >= abs_l && abs_c >= abs_r) {
+      // gradient dominant in direction of c
+      dl = abs_l - abs_c / 2;
+      dr = abs_r - abs_c / 2;
 
       while (true) {
         DrawCell(r1, c1, l1, pressure);
@@ -117,22 +120,23 @@ public class VoxelGrid : MonoBehaviour {
         }
 
         if (dl >= 0) {
-          l1 += sl;
-          dl -= ac;
+          l1 += sign_l;
+          dl -= abs_c;
         }
 
         if (dr >= 0) {
-          r1 += sr;
-          dr -= ac;
+          r1 += sign_r;
+          dr -= abs_c;
         }
 
-        c1 += sc;
-        dl += al;
-        dr += ar;
+        c1 += sign_c;
+        dl += abs_l;
+        dr += abs_r;
       }
-    } else if (al >= ac && al >= ar) {
-      dc = ac - al / 2;
-      dr = ar - al / 2;
+    } else if (abs_l >= abs_c && abs_l >= abs_r) {
+      // gradient dominant in direction of l
+      dc = abs_c - abs_l / 2;
+      dr = abs_r - abs_l / 2;
 
       while (true) {
         DrawCell(r1, c1, l1, pressure);
@@ -142,22 +146,23 @@ public class VoxelGrid : MonoBehaviour {
         }
 
         if (dc >= 0) {
-          c1 += sc;
-          dc -= al;
+          c1 += sign_c;
+          dc -= abs_l;
         }
 
         if (dr >= 0) {
-          r1 += sr;
-          dr -= al;
+          r1 += sign_r;
+          dr -= abs_l;
         }
 
-        l1 += sl;
-        dc += ac;
-        dr += ar;
+        l1 += sign_l;
+        dc += abs_c;
+        dr += abs_r;
       }
-    } else if (ar >= al && ar >= ac) {
-      dc = ac - ar / 2;
-      dl = al - ar / 2;
+    } else if (abs_r >= abs_l && abs_r >= abs_c) {
+      // gradient dominant in direction of r
+      dc = abs_c - abs_r / 2;
+      dl = abs_l - abs_r / 2;
 
       while (true) {
         DrawCell(r1, c1, l1, pressure);
@@ -167,18 +172,18 @@ public class VoxelGrid : MonoBehaviour {
         }
 
         if (dc >= 0) {
-          c1 += sc;
-          dc -= ar;
+          c1 += sign_c;
+          dc -= abs_r;
         }
 
         if (dl >= 0) {
-          l1 += sl;
-          dl -= ar;
+          l1 += sign_l;
+          dl -= abs_r;
         }
 
-        r1 += sr;
-        dc += ac;
-        dl += al;
+        r1 += sign_r;
+        dc += abs_c;
+        dl += abs_l;
       }
     }
   }
@@ -189,13 +194,26 @@ public class VoxelGrid : MonoBehaviour {
    * @param point the point to add.
    */
   public void LogPoint(int id, Vector3 point) {
-    history.Add(point);
+    int i = 0;
 
-    if (history.Count > MAX_HISTORY) {
-      history.RemoveAt(0);
+    while (i < histories.Count) {
+      if (histories[i] != null && histories[i].Id == id) {
+        break;
+      }
+
+      i++;
     }
 
-    brush.Paint(this, history);
+    if (i == histories.Count) {
+      histories.Add(new VectorQueue(id, MAX_HISTORY));
+    }
+
+    histories[i].Add(point);
+    brush.Paint(this, histories[i]);
+
+    if (histories.Count > MAX_TRACKERS) {
+      histories.RemoveAt(0);
+    }
   }
 
   /**

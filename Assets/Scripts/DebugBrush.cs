@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Leap;
 
 public class DebugBrush : Brush {
-  public override void Paint(VoxelGrid canvas, List<Vector3> points) {
+  public override void Paint(VoxelGrid canvas, VectorQueue points) {
     if (points.Count == 0) {
       return;
     }
