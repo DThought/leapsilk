@@ -316,5 +316,9 @@ public class VoxelGrid : MonoBehaviour {
     if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {
       transform.Rotate(Vector3.up, -ROTATION_STEP);
     }
+
+    if (Input.GetKey(KeyCode.Escape)) {
+      Application.Quit();
+    }
   }
 }
