@@ -6,6 +6,7 @@ using Leap;
 public class VoxelGrid : MonoBehaviour {
   protected const int MAX_HISTORY = 4;
   protected const int MAX_TRACKERS = 2;
+  protected const int ROTATION_STEP = 15;
 
   public int gridWidth = 25;
   public int gridHeight = 25;
@@ -204,6 +205,7 @@ public class VoxelGrid : MonoBehaviour {
       histories.Add(new VectorQueue(id, MAX_HISTORY));
     }
 
+    point = Quaternion.Inverse(transform.rotation) * point;
     histories[i].Add(point);
     brush.Paint(this, histories[i]);
 
@@ -304,5 +306,15 @@ public class VoxelGrid : MonoBehaviour {
     position.y = (int) ((position.y + center_z) / cellDepth);
     position.z = (int) ((position.z + center_y) / cellHeight);
     return position;
+  }
+
+  void Update() {
+    if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A)) {
+      transform.Rotate(Vector3.up, ROTATION_STEP);
+    }
+
+    if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D)) {
+      transform.Rotate(Vector3.up, -ROTATION_STEP);
+    }
   }
 }
