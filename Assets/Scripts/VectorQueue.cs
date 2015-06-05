@@ -3,17 +3,21 @@ using System;
 using System.Collections.Generic;
 
 public class VectorQueue {
-  public int Id { get; set; }
-  
   protected List<Vector3> history;
   protected int c;
 
+  /**
+   * @brief The current number of points in history.
+   */
   public int Count {
     get {
       return history.Count;
     }
   }
 
+  /**
+   * @brief The number of points to maintain in history.
+   */
   public int Capacity {
     get {
       return c;
@@ -32,6 +36,14 @@ public class VectorQueue {
     }
   }
 
+  /**
+   * @brief The ID of the associated tracker.
+   */
+  public int Id { get; set; }
+
+  /**
+   * @brief Access item indexed from the start of the history.
+   */
   public Vector3 this[int i] {
     get {
       return history[i];
@@ -42,12 +54,21 @@ public class VectorQueue {
     }
   }
 
+  /**
+   * @brief Creates a new VectorQueue.
+   * @param id ID of the associated tracker.
+   * @param capacity number of points to maintain in history.
+   */
   public VectorQueue(int id, int capacity) {
     history = new List<Vector3>();
     Id = id;
     Capacity = capacity;
   }
 
+  /**
+   * @brief Adds a point to the end of the history.
+   * @param value the point to add.
+   */
   public void Add(Vector3 value) {
     history.Add(value);
 

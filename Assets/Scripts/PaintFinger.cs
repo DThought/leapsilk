@@ -17,8 +17,8 @@ public class PaintFinger : SkeletalFinger {
   
   private int colorNumber = 0;
 
-  public override void InitFinger() {
-    base.InitFinger();
+  public override void UpdateFinger() {
+    base.UpdateFinger();
 
     if (GetLeapFinger().IsExtended &&
         GetLeapFinger().TipVelocity.MagnitudeSquared >= MIN_SPEED) {
